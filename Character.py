@@ -19,6 +19,7 @@
 
 """
 0-базис: есть персонаж, у него есть шесть характеристик и базовые ресурсы (максимальное здоровье, броня, профиенси бонус и опыт)
+1-базис: у персонажа есть раса, раса даёт бонус к характеристикам и имеет какие-то свои трейты
 """
 
 # Блок сборной сущности (токен, персонаж, монстр, непись)
@@ -30,20 +31,22 @@ class Token:
     
 
 class Character(Token):
-    def __init__(self, Resources, Abilities):
+    def __init__(self, Resources, AbilityValues, RaceName):
+        self.RaceName = RaceName
+        self.RacialTraits = RacialTraits(RaceName)
         self.resources = Resources
-        self.abilities = Abilities
+        self.abilities = Abilities(AbilityValues, self.RacialTraits.AbilityScoreIncrease) 
 
 # Блок характеристик
 
 class Abilities:
-    def __init__(self, value_strength, value_dexterity, value_constitution, value_intelligence, value_wisdom, value_charisma):
-        self.strength = Ability("Strength", value_strength)
-        self.dexterity = Ability("Dexterity", value_dexterity)
-        self.constitution = Ability("Constitution", value_constitution)
-        self.intelligence = Ability("Intelligence", value_intelligence)
-        self.wisdom = Ability("Wisdom", value_wisdom)
-        self.charisma = Ability("Charisma", value_charisma)
+    def __init__(self, AbilityValues  = [10, 10, 10, 10, 10, 10], ability_score_increases = [0, 0, 0, 0, 0, 0]):
+        self.strength = Ability("Strength", AbilityValues[0]+ability_score_increases[0])
+        self.dexterity = Ability("Dexterity", AbilityValues[1]+ability_score_increases[1])
+        self.constitution = Ability("Constitution", AbilityValues[2]+ability_score_increases[2])
+        self.intelligence = Ability("Intelligence", AbilityValues[3]+ability_score_increases[3])
+        self.wisdom = Ability("Wisdom", AbilityValues[4]+ability_score_increases[4])
+        self.charisma = Ability("Charisma", AbilityValues[5]+ability_score_increases[5])
 
 class Ability:
     def __init__(self, name, value):
@@ -66,12 +69,31 @@ class Resource:
         self.value = value
 
 
-Jhon = Character(Resources(20, 15, 2, 0), Abilities(15, 14, 13, 12, 10, 8))
-print("Jhon's hp are " + str(Jhon.resources.max_HP.value))
+# Блок расовые трейты
+
+class RacialTraits:
+    def __init__(self, RaceName) -> None:
+        if RaceName == "Human":
+            self.AbilityScoreIncrease = [1, 1, 1, 1, 1, 1]
+            self.Speed = 30
+            self.Size = "Medium"
+            self.Languages = ["Common"]
+        elif RaceName == "Elf":
+            pass
+        else:
+            self.AbilityScoreIncrease = [0, 0, 0, 0, 0, 0]
+            self.Speed = 30
+            self.Size = "Medium"
+            self.Languages = ["Common"]
+
+class SubraceTraits:
+    pass 
+
+
+# Jhon = Character(Name, Experience, RaceTraits, ClassTraits, Abilities, Background, Inventory, Alignment)
+# Jhon = Character("Jhon", 0, "Human", "Fighter", [15, 14, 13, 12, 10, 8], "Soldier", Inventory, "CG")
+
+Jhon = Character(Resources(20, 15, 2, 0), [15, 14, 13, 12, 10, 8], "Human")
+print("Jhon's hp are " + str(Jhon.RacialTraits.Speed))
 print("Jhon's Strength value is " + str(Jhon.abilities.strength.value))
 print("Jhon's Strength modifier is " + str(Jhon.abilities.strength.modifier))
-
-SomeToken = Token()
-print("SomeToken's hp are " + str(SomeToken.resources.max_HP.value))
-print("SomeToken's Strength value is " + str(SomeToken.abilities.strength.value))
-print("SomeToken's Strength modifier is " + str(SomeToken.abilities.strength.modifier))

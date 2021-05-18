@@ -20,6 +20,7 @@
 """
 0-базис: есть персонаж, у него есть шесть характеристик и базовые ресурсы (максимальное здоровье, броня, профиенси бонус и опыт)
 1-базис: у персонажа есть раса, раса даёт бонус к характеристикам и имеет какие-то свои трейты
+2-базис: у персонажа есть класс, класс даёт начальное хп.
 """
 
 # Блок сборной сущности (токен, персонаж, монстр, непись)
@@ -31,11 +32,43 @@ class Token:
     
 
 class Character(Token):
-    def __init__(self, Resources, AbilityValues, RaceName):
-        self.RaceName = RaceName
-        self.RacialTraits = RacialTraits(RaceName)
+    def __init__(self, AbilityValues, RaceName, ClassName):
+        
+        self.race_name = RaceName
+        self.racial_traits = RacialTraits(RaceName)
+       
         self.resources = Resources
-        self.abilities = Abilities(AbilityValues, self.RacialTraits.AbilityScoreIncrease) 
+        self.abilities = Abilities(AbilityValues, self.racial_traits.AbilityScoreIncrease)
+       
+        self.class_name = ClassName
+        self.class_traits = ClassTraits(ClassName)
+
+        #Пока ресурсы расположим тут
+        self.max_hp = Resource("max_HP", self.class_traits.hp_1lvl + self.abilities.constitution.modifier)
+        self.xp = Resource("xp", 0)
+        self.pb = 2
+        self.ac = 10 + self.abilities.dexterity.modifier
+
+
+        #Блок прописанных значений характеристик самому классу персонажа, чтобы не долбиться в характеристики через класс Abilities 
+        self.strength_value = self.abilities.strength.value
+        self.strength_modifier = self.abilities.strength.modifier
+
+        self.dexterity_value = self.abilities.dexterity.value
+        self.dexterity_modifier = self.abilities.dexterity.modifier
+
+        self.constitution_value = self.abilities.constitution.value
+        self.constitution_modifier = self.abilities.constitution.modifier
+
+        self.intelligence_value = self.abilities.intelligence.value
+        self.intelligence_modifier = self.abilities.intelligence.modifier
+
+        self.wisdom_value = self.abilities.wisdom.value
+        self.wisdom_modifier = self.abilities.wisdom.modifier
+
+        self.charisma_value = self.abilities.charisma.value
+        self.charisma_modifier = self.abilities.charisma.modifier
+        #####################################################################
 
 # Блок характеристик
 
@@ -81,19 +114,72 @@ class RacialTraits:
         elif RaceName == "Elf":
             pass
         else:
-            self.AbilityScoreIncrease = [0, 0, 0, 0, 0, 0]
+            self.AbilityScoreIncrease = (0, 0, 0, 0, 0, 0)
             self.Speed = 30
             self.Size = "Medium"
             self.Languages = ["Common"]
 
 class SubraceTraits:
+    pass
+
+# Блок классовые трейты
+
+class ClassTraits:
+    def __init__(self, ClassName) -> None:
+        if ClassName == "Fighter":
+            self.hp_1lvl = 10
+            self.HDice = 10
+            self.HDice_amount = 1
+            self.hp_per_lvl = 10
+            self.hp_per_lvl_average = 6
+
+            # Proficiencies блок
+            #Armor: All armor, shields
+            #Weapons: Simple weapons, martial weapons
+            #Tools: None
+            #Saving Throws: Strength, Constitution
+            #Skills: Choose two skills from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, and Survival
+            #Standart Fighter Equipment
+
+            
+        elif ClassName == "Rogue":
+            self.hp_1lvl = 8
+            self.HDice = 8
+            self.HDice_amount = 1
+            self.hp_per_lvl = 8
+            self.hp_per_lvl_average = 5
+        elif ClassName == "Cleric":
+            self.hp_1lvl = 8
+            self.HDice = 8
+            self.HDice_amount = 1
+            self.hp_per_lvl = 8
+            self.hp_per_lvl_average = 5
+        elif ClassName == "Wizard":
+            self.hp_1lvl = 6
+            self.HDice = 6
+            self.HDice_amount = 1
+            self.hp_per_lvl = 6
+            self.hp_per_lvl_average = 4
+        else:
+            pass
+
+class ArchetypeTraits:
     pass 
+
 
 
 # Jhon = Character(Name, Experience, RaceTraits, ClassTraits, Abilities, Background, Inventory, Alignment)
 # Jhon = Character("Jhon", 0, "Human", "Fighter", [15, 14, 13, 12, 10, 8], "Soldier", Inventory, "CG")
 
-Jhon = Character(Resources(20, 15, 2, 0), [15, 14, 13, 12, 10, 8], "Human")
-print("Jhon's hp are " + str(Jhon.RacialTraits.Speed))
+Jhon = Character([15, 14, 13, 12, 10, 8], "Human", "Fighter")
+
+print("Jhon's hp are " + str(Jhon.max_hp))
+print("Jhon's ac is " + str(Jhon.ac))
+
 print("Jhon's Strength value is " + str(Jhon.abilities.strength.value))
 print("Jhon's Strength modifier is " + str(Jhon.abilities.strength.modifier))
+
+print("Jhon's Wisdom value is " + str(Jhon.wisdom_value))
+print("Jhon's Wisdom modifier is " + str(Jhon.wisdom_modifier))
+
+print("Jhon's HDice is " + str(Jhon.class_traits.HDice_amount) + "d" + str(Jhon.class_traits.HDice))
